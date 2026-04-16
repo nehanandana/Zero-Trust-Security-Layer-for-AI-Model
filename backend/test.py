@@ -1,8 +1,10 @@
 import requests
 import json
+import time
 
 BASE_URL = "http://127.0.0.1:5000"
 
+# ---------- EXISTING TESTS (UNCHANGED) ----------
 def test_health():
     """Test if server is running"""
     print("\nTesting")
@@ -115,26 +117,63 @@ def test_missing_fields():
         print("FAILED")
         return False
 
-# Run all tests
+
+
+
+# ---------- NEW AUTH TESTS ----------
+def test_login():
+    print("\nLogin Test")
+    data = {"username": "alice", "password": "AliceStrong123"}
+    res = requests.post(f"{BASE_URL}/login", json=data)
+    token = res.json().get("token")
+    print(res.json())
+    return token
+
+def test_invalid_login():
+    print("\nInvalid Login Test")
+    data = {"username": "alice", "password": "wrong"}
+    print(requests.post(f"{BASE_URL}/login", json=data).json())
+
+def test_no_token():
+    print("\nUnauthorized Access Test")
+    print(requests.get(f"{BASE_URL}/dashboard").json())
+
+def test_authorized(token):
+    print("\nAuthorized Access Test")
+    headers = {"Authorization": f"Bearer {token}"}
+    print(requests.get(f"{BASE_URL}/dashboard", headers=headers).json())
+
+def test_tampered(token):
+    print("\nSession Tampering Test")
+    fake = token + "abc"
+    headers = {"Authorization": f"Bearer {fake}"}
+    print(requests.get(f"{BASE_URL}/dashboard", headers=headers).json())
+
+def test_expired(token):
+    print("\nExpired Token Test")
+    time.sleep(6)
+    headers = {"Authorization": f"Bearer {token}"}
+    print(requests.get(f"{BASE_URL}/dashboard", headers=headers).json())
+
+# ---------- RUN ----------
 if __name__ == "__main__":
-    print("STARTING TESTS FOR REGISTRATION SYSTEM")
-    
-    # First check if server is running
-    try:
-        if not test_health():
-            print("\nERROR: Server is not running!")
-            print("Please run: python app.py in another terminal")
-            exit(1)
-    except:
-        print("\nERROR: Cannot connect to server!")
-        print("Please make sure server is running: python app.py")
-        exit(1)
-    
-    # Run all tests
+    print("STARTING TESTS")
+
+    if not test_health():
+        print("Server not running")
+        exit()
+
     test_register_success()
     test_duplicate_user()
     test_weak_password()
     test_invalid_email()
     test_missing_fields()
-    
+
+    token = test_login()
+
+    test_invalid_login()
+    test_no_token()
+    test_authorized(token)
+    test_tampered(token)
+    test_expired(token) 
     print("ALL TESTS COMPLETED")
