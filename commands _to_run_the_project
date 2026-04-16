@@ -2,4 +2,3 @@ pip install flask bcrypt requests
 pip install pyjwt
 python app.py
 python test.py
-python test_auth.py
