@@ -206,6 +206,45 @@ def dashboard():
 def admin():
     return jsonify({"message": "Admin access granted"})
 
+
+# -------- CHAT (YOUR MODULE INTEGRATION) --------
+@app.route('/chat', methods=['POST'])
+@token_required
+def chat():
+    from prompt_filter import classify_prompt, log_prompt
+
+    data = request.get_json()
+    prompt = data.get("prompt")
+
+    if not prompt:
+        return jsonify({"error": "Prompt required"}), 400
+
+    user_id = request.user.get("user_id")
+    risk = classify_prompt(prompt)
+    log_prompt(user_id, prompt, risk)
+
+    if risk == "Malicious":
+        return jsonify({
+            "status": "blocked",
+            "reason": "Malicious prompt detected",
+            "risk": risk
+        }), 403
+
+    elif risk == "Suspicious":
+        return jsonify({
+            "status": "warned",
+            "response": f"AI Response to: {prompt}",
+            "risk": risk,
+            "warning": "This prompt was flagged as suspicious"
+        }), 200
+
+    return jsonify({
+        "status": "success",
+        "response": f"AI Response to: {prompt}",
+        "risk": risk
+    })
+
+
 # ================= MAIN =================
 if __name__ == '__main__':
     init_database()
