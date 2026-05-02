@@ -1,3 +1,5 @@
+# from click import prompt
+from trust_engine import update_trust_score, check_rate_limit, make_decision
 from flask import Flask, request, jsonify
 import bcrypt
 import re
@@ -13,7 +15,7 @@ app = Flask(__name__)
 # ================= CONFIG =================
 DATABASE_PATH = 'users.db'
 SECRET_KEY = "super_secret_key"
-TOKEN_EXPIRY_SECONDS = 5
+TOKEN_EXPIRY_SECONDS = 300
 
 # ================= DATABASE =================
 @contextmanager
@@ -220,31 +222,49 @@ def chat():
         return jsonify({"error": "Prompt required"}), 400
 
     user_id = request.user.get("user_id")
+
+    # Step 1: Prompt analysis
     risk = classify_prompt(prompt)
     log_prompt(user_id, prompt, risk)
 
-    if risk == "Malicious":
+    # Step 2: Normalize risk (Safe → safe)
+    risk_lower = risk.lower()
+
+    # Step 3: Rate limiting
+    if not check_rate_limit(user_id):
         return jsonify({
             "status": "blocked",
-            "reason": "Malicious prompt detected",
-            "risk": risk
+            "reason": "Too many requests"
+        }), 429
+
+    # Step 4: Update trust score
+    score = update_trust_score(user_id, risk_lower)
+
+    # Step 5: Decision engine
+    decision = make_decision(user_id)
+
+    # Step 6: Apply Zero Trust decision
+    if decision == "BLOCK":
+        return jsonify({
+            "status": "blocked",
+            "reason": "Low trust score",
+            "trust_score": score
         }), 403
 
-    elif risk == "Suspicious":
+    elif decision == "RESTRICT":
         return jsonify({
-            "status": "warned",
-            "response": f"AI Response to: {prompt}",
-            "risk": risk,
-            "warning": "This prompt was flagged as suspicious"
+            "status": "restricted",
+            "response": "Limited response due to suspicious activity",
+            "trust_score": score
         }), 200
 
+    # Step 7: If allowed → normal response
     return jsonify({
         "status": "success",
         "response": f"AI Response to: {prompt}",
-        "risk": risk
+        "risk": risk,
+        "trust_score": score
     })
-
-
 # ================= MAIN =================
 if __name__ == '__main__':
     init_database()
