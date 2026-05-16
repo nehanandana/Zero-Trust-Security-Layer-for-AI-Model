@@ -1,0 +1,2141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero Trust AI Security Layer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #9db8ef;
+            min-height: 100vh;
+            color: #1a1a2e;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 50px 80px 50px 80px;
+            height: auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 15px;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #1a1a2e;
+        }
+
+        .header p {
+            color: #888;
+            margin-top: 8px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            height: auto;
+            min-height: 400px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid #eaeaea;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #1a1a2e;
+            border-left: 3px solid #a3c4f3;
+            padding-left: 12px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #2a3a5a;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #8892b0;
+            border-radius: 10px 10px 0 0;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+        }
+
+        .tab-btn.active {
+            color: #00d4ff;
+            border-bottom: 2px solid #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #b8bdd6;
+            background: #f0f4ff;
+            color: #1a1a2e;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #8aaee0;
+            background: #ffffff;
+            box-shadow: 0 0 10px rgba(163, 196, 243, 0.3);
+        }
+
+        button {
+            padding: 12px;
+            border-radius: 6px;
+            border: none;
+            background: #a3c4f3;
+            color: #1a1a2e;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        button:hover:not(:disabled) {
+            background: #8bb4eb;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .logout-btn {
+            background: #e0e0e0;
+            color: #1a1a2e;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .admin-panel {
+            margin-top: 20px;
+        }
+
+        .admin-badge {
+            background: #a3c4f3;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+            color: #1a1a2e;
+        }
+
+        .review-btn {
+            background: #e0e0e0;
+            color: #1a1a2e;
+            padding: 5px 12px;
+            font-size: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .refresh-btn {
+            background: #a3c4f3;
+            color: #1a1a2e;
+            padding: 8px 15px;
+            font-size: 12px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .trust-score-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-gauge {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px;
+            position: relative;
+        }
+
+        .score-circle {
+            transform: rotate(-90deg);
+        }
+
+        .score-bg {
+            stroke: #eaeaea;
+            stroke-width: 10;
+            fill: none;
+        }
+
+        .score-fill {
+            stroke: url(#gradient);
+            stroke-width: 10;
+            fill: none;
+            stroke-dasharray: 314;
+            stroke-dashoffset: 314;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .score-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: #8892b0;
+        }
+
+        .decision-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .decision-allow {
+            background: #f0fff0;
+            color: #3c763d;
+            border: 1px solid #97e096;
+        }
+
+        .decision-restrict {
+            background: #fff9e6;
+            color: #8a6d3b;
+            border: 1px solid #f7cf84;
+        }
+
+        .decision-block {
+            background: #fdf2f2;
+            color: #922b21;
+            border: 1px solid #ec7063;
+        }
+
+        .chat-messages {
+            height: 250px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f7f8fa;
+            border-radius: 15px;
+            border: 1px solid #eaeaea;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message.user {
+            align-items: flex-end;
+        }
+
+        .message.ai {
+            align-items: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: #a3c4f3;
+            color: #1a1a2e;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.ai .message-bubble {
+            background: #ffffff;
+            border: 1px solid #eaeaea;
+            border-bottom-left-radius: 5px;
+            color: #1a1a2e;
+        }
+
+        .message-time {
+            font-size: 10px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 25px;
+            border: 1px solid #eaeaea;
+            background: #ffffff;
+            color: #1a1a2e;
+            outline: none;
+        }
+
+        .chat-input-area input:focus {
+            border-color: #8aaee0;
+            background: #ffffff;
+        }
+
+        .chat-input-area input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .alert-banner {
+            padding: 16px 24px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: none;
+            animation: slideDown 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            width: 100%;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            text-align: center;
+            z-index: 2000;
+        }
+
+        #alertBanner {
+            position: sticky;
+            top: 20px;
+            margin-bottom: 30px;
+            max-width: 100%;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+        }
+
+        .alert-banner.hide {
+            animation: slideUp 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+        }
+
+        .alert-danger {
+            background: #fdf2f2;
+            color: #922b21;
+            border-color: #ec7063;
+        }
+
+        .alert-warning {
+            background: #fff9e6;
+            color: #8a6d3b;
+            border-color: #f7cf84;
+        }
+
+        .alert-success {
+            background: #f0fff0;
+            color: #3c763d;
+            border-color: #97e096;
+        }
+
+        .alert-info {
+            background: #eef7ff;
+            color: #31708f;
+            border-color: #1e90ff;
+        }
+
+        .dashboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .dashboard-table th,
+        .dashboard-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eaeaea;
+            color: #1a1a2e;
+        }
+
+        .dashboard-table th {
+            color: #8aaee0;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .status-allow {
+            background: #f0fff0;
+            color: #3c763d;
+            border: 1px solid #97e096;
+        }
+
+        .status-restrict {
+            background: #fff9e6;
+            color: #8a6d3b;
+            border: 1px solid #f7cf84;
+        }
+
+        .status-block {
+            background: #fdf2f2;
+            color: #922b21;
+            border: 1px solid #ec7063;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            border: 1px solid #eaeaea;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content h3 {
+            color: #1a1a2e;
+            margin-bottom: 15px;
+        }
+
+        .close-modal {
+            float: right;
+            cursor: pointer;
+            font-size: 24px;
+            color: #ff4444;
+        }
+
+        .prompt-log-item {
+            background: #f7f8fa;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 3px solid #ff4444;
+            border-top: 1px solid #eaeaea;
+            border-right: 1px solid #eaeaea;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .prompt-log-time {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .prompt-text {
+            font-family: monospace;
+            font-size: 13px;
+            word-break: break-word;
+            color: #1a1a2e;
+        }
+
+        .approve-unblock {
+            background: #a3c4f3;
+            margin-top: 15px;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .server-status {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 10px;
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .server-online {
+            color: #00ff00;
+        }
+
+        .server-offline {
+            color: #ff4444;
+        }
+
+        .password-hint {
+            font-size: 11px;
+            color: #8892b0;
+            margin-top: 5px;
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .password-wrapper input {
+            flex: 1;
+            padding-right: 45px;
+            width: 100%;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 14px;
+            background: transparent;
+            border: none;
+            padding: 5px;
+            color: #00d4ff;
+        }
+
+        /* ================= SPLIT SCREEN DESIGN ================= */
+        .login-layout {
+            display: flex;
+            min-height: 70vh;
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.05);
+            color: #1a1a2e;
+        }
+
+        .login-sidebar {
+            flex: 0 0 35%;
+            background: #f7f8fa;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 1px solid #eaeaea;
+        }
+
+        .login-main {
+            flex: 1;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .brand-logo {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1a1a2e;
+            letter-spacing: 2px;
+            margin-bottom: 60px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stepper {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            position: relative;
+        }
+
+        .stepper::before {
+            content: '';
+            position: absolute;
+            left: 14px;
+            top: 20px;
+            bottom: 20px;
+            width: 2px;
+            background: #eaeaea;
+            z-index: 1;
+        }
+
+        .step {
+            display: flex;
+            gap: 15px;
+            position: relative;
+            z-index: 2;
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #b8bdd6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #b8bdd6;
+        }
+
+        .step.active .step-circle {
+            border-color: #a3c4f3;
+            color: #a3c4f3;
+            border-width: 4px;
+        }
+
+        .step-text h4 {
+            font-size: 14px;
+            color: #1a1a2e;
+            margin-bottom: 3px;
+        }
+
+        .step-text p {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .dots {
+            display: flex;
+            gap: 5px;
+            margin-top: 40px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #eaeaea;
+        }
+
+        .dot.active {
+            background: #a3c4f3;
+        }
+
+        .badge-icon {
+            font-size: 40px;
+            color: #1a2a4a;
+            margin-bottom: 20px;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header h2 {
+            color: #1a1a2e !important;
+            font-size: 24px !important;
+            margin-bottom: 8px !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+
+        .form-header p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .light-input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .light-input-group label {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: -8px;
+            margin-left: 10px;
+            background: white;
+            padding: 0 5px;
+            z-index: 1;
+            width: fit-content;
+        }
+
+        .light-input-group input {
+            padding: 12px 15px;
+            border: 1px solid #eaeaea !important;
+            border-radius: 6px !important;
+            font-size: 14px !important;
+            outline: none !important;
+            background: white !important;
+            color: #1a1a2e !important;
+            transition: border-color 0.3s;
+            box-shadow: none !important;
+        }
+
+        .light-input-group input:focus {
+            border-color: #a3c4f3 !important;
+        }
+
+        .btn-light-primary {
+            width: 100%;
+            max-width: 400px;
+            background: #a3c4f3 !important;
+            color: #1a1a2e !important;
+            border-radius: 6px !important;
+            padding: 14px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            margin-top: 10px !important;
+            box-shadow: none !important;
+        }
+
+        .btn-light-primary:hover {
+            background: #8bb4eb !important;
+            transform: none !important;
+        }
+
+        .auth-switch {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .auth-switch a {
+            color: #b8bdd6;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                height: 65vh;
+                min-height: 450px;
+            }
+
+            .login-layout {
+                flex-direction: column;
+            }
+
+            .login-sidebar {
+                flex: none;
+                border-right: none;
+                border-bottom: 1px solid #eaeaea;
+                padding: 20px;
+            }
+
+            .stepper {
+                flex-direction: row;
+                gap: 15px;
+                overflow-x: auto;
+            }
+
+            .stepper::before {
+                display: none;
+            }
+        }
+
+        /* Profile Dropdown */
+        .top-nav {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .profile-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #ffffff;
+            border: 1px solid #eaeaea;
+            padding: 8px 15px;
+            border-radius: 30px;
+            cursor: pointer;
+            color: #1a1a2e;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .profile-button:hover {
+            background: #f7f8fa;
+        }
+
+        .profile-icon {
+            width: 28px;
+            height: 28px;
+            background: #a3c4f3;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .profile-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 115%;
+            background-color: #ffffff;
+            min-width: 150px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            border: 1px solid #eaeaea;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .profile-dropdown-content a {
+            color: #1a1a2e;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .profile-dropdown-content a:hover {
+            background-color: #f7f8fa;
+            color: #a3c4f3;
+        }
+
+        .profile-menu.active .profile-dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Global App Alert Banner -->
+        <div id="alertBanner" class="alert-banner"></div>
+
+        <!-- Login/Register Section (Split Screen Layout) -->
+        <div id="loginSection" class="login-layout">
+            <!-- Left Sidebar -->
+            <div class="login-sidebar">
+
+
+                <div class="stepper">
+                    <div id="step1" class="step active">
+                        <div class="step-circle">1</div>
+                        <div class="step-text">
+                            <h4 id="step1Title">Authentication</h4>
+                            <p id="step1Desc">Enter your credentials</p>
+                        </div>
+                    </div>
+                    <div id="step2" class="step">
+                        <div class="step-circle">2</div>
+                        <div class="step-text">
+                            <h4 id="step2Title">Verification</h4>
+                            <p id="step2Desc">MFA Security Check</p>
+                        </div>
+                    </div>
+                    <div id="step3" class="step">
+                        <div class="step-circle">3</div>
+                        <div class="step-text">
+                            <h4>Finishing Up</h4>
+                            <p>Start using DarkWave</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Content Area -->
+            <div class="login-main">
+
+                <div class="badge-icon">🪪</div>
+
+                <!-- LOGIN FORM -->
+                <div id="loginFormContainer"
+                    style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+
+                    <div id="loginError" class="alert-banner alert-danger" style="margin-bottom: 20px;"></div>
+
+                    <div class="form-header">
+                        <h2>Welcome Back</h2>
+                        <p>Please enter your details to login</p>
+                    </div>
+
+                    <div class="light-input-group">
+                        <label>Username</label>
+                        <input type="text" id="loginUsername" placeholder="username">
+                    </div>
+
+                    <div class="light-input-group">
+                        <label>Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="loginPassword" placeholder="password">
+                            <button type="button" class="toggle-password" style="color: #b8bdd6;"
+                                onclick="togglePassword('loginPassword', this)">👁️</button>
+                        </div>
+                    </div>
+
+                    <div id="mfaField" class="light-input-group hidden">
+                        <label>MFA Code</label>
+                        <input type="text" id="loginMfaCode" placeholder="6-digit code">
+                    </div>
+
+
+
+                    <button class="btn-light-primary" onclick="handleLogin()">Login</button>
+
+                    <div class="auth-switch">
+                        New here? <a onclick="switchTab('register')">Create an account</a>
+                    </div>
+                </div>
+
+                <!-- REGISTER FORM -->
+                <div id="registerFormContainer" class="hidden"
+                    style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+
+                    <div id="registerError" class="alert-banner alert-danger" style="margin-bottom: 20px;"></div>
+                    <div id="registerSuccess" class="alert-banner alert-success" style="margin-bottom: 20px;"></div>
+
+                    <div class="form-header">
+                        <h2>Your Details</h2>
+                        <p>Please provide us with your information</p>
+                    </div>
+
+                    <div class="light-input-group">
+                        <label>Username</label>
+                        <input type="text" id="regUsername" placeholder="Choose username">
+                    </div>
+
+                    <div class="light-input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="regEmail" placeholder="your@email.com">
+                    </div>
+
+                    <div class="light-input-group">
+                        <label>Create Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="regPassword" placeholder="Secure password">
+                            <button type="button" class="toggle-password" style="color: #b8bdd6;"
+                                onclick="togglePassword('regPassword', this)">👁️</button>
+                        </div>
+                        <p style="font-size: 10px; color: #888; margin-top: 5px;">Must be 8+ chars (upper, lower, num)
+                        </p>
+                    </div>
+
+
+
+                    <button class="btn-light-primary" onclick="handleRegister()">Next step</button>
+
+                    <div class="auth-switch">
+                        Already have an account? <a onclick="switchTab('login')">Login instead</a>
+                    </div>
+                </div>
+
+                <div class="dots">
+                    <div id="dot1" class="dot active"></div>
+                    <div id="dot2" class="dot"></div>
+                </div>
+            </div>
+        </div>
+        <!-- MFA Setup Screen (shown when MFA is required - COMPULSORY) -->
+        <div id="mfaSetupScreen" class="card hidden">
+            <h2> Multi-Factor Authentication Required</h2>
+            <p style="color: #ffcc00; margin-bottom: 20px;">
+                For security reasons, you must set up Multi-Factor Authentication before accessing the system.
+            </p>
+            <div id="compulsoryQrContainer" style="text-align: center; margin: 20px 0;"></div>
+            <p style="font-size: 12px; color: #8892b0; text-align: center;">
+                1. Install Google Authenticator from App Store/Play Store<br>
+                2. Scan the QR code above<br>
+                3. Enter the 6-digit code below
+            </p>
+            <div class="input-group">
+                <label>Verification Code</label>
+                <input type="text" id="compulsoryMfaCode" placeholder="Enter 6-digit code">
+            </div>
+            <div id="mfaSetupError" class="alert-banner alert-danger" style="display: none;"></div>
+            <button onclick="verifyCompulsoryMFA()">Verify & Complete Setup</button>
+        </div>
+        <!-- Main App Section -->
+        <div id="appSection" class="hidden">
+            <!-- Top Nav with Profile Dropdown -->
+            <div class="top-nav">
+                <div class="profile-menu" id="profileMenu" onclick="toggleDropdown()">
+                    <div class="profile-button">
+                        <div class="profile-icon">👤</div>
+                        <span id="displayUsername">User</span>
+                        <span id="dropdownArrow" style="font-size: 10px;">▼</span>
+                    </div>
+                    <div class="profile-dropdown-content">
+                        <a href="#">ACCOUNT</a>
+                        <a href="#" onclick="handleLogout()">LOG OUT</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-grid">
+                <!-- Left Column -->
+                <div class="card" style="display: flex; flex-direction: column; margin-bottom: 0;">
+                    <!-- SECTION 1: TRUST SCORE -->
+                    <div id="trustScoreSection">
+                        <h2> Dynamic Trust Score</h2>
+                        <div class="trust-score-container">
+                            <div class="score-gauge">
+                                <svg width="120" height="120" class="score-circle">
+                                    <defs>
+                                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#a3c4f3" />
+                                            <stop offset="100%" style="stop-color:#b8bdd6" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="60" cy="60" r="50" class="score-bg" />
+                                    <circle cx="60" cy="60" r="50" class="score-fill" id="scoreCircle" />
+                                </svg>
+                                <div class="score-text" id="trustScoreValue">100</div>
+                            </div>
+                            <div class="score-label">Trust Score (0-100)</div>
+                            <div>
+                                <span class="decision-badge" id="decisionBadge">ALLOW</span>
+                            </div>
+                        </div>
+                        <hr id="trustScoreDivider" style="margin: 25px 0; border: none; border-top: 1px solid #eaeaea;">
+                    </div>
+
+                    <!-- SECTION 2: ADMIN PANEL (Hidden by default) -->
+                    <div id="adminPanel" class="hidden">
+                        <h2> Admin Dashboard</h2>
+                        <p style="font-size: 12px; color: #8892b0; margin-bottom: 15px;">
+                            Users with trust score below 40 are blocked.
+                        </p>
+                        <div style="flex: 0 0 auto; max-height: 100px; overflow-y: auto;">
+                            <table class="dashboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>User ID</th>
+                                        <th>Username</th>
+                                        <th>Trust Score</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="blockedUsersTable">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center;">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr id="adminPanelDivider" style="margin: 25px 0; border: none; border-top: 1px solid #eaeaea;">
+                    </div>
+
+                    <!-- SECTION 3: ACTIVITY LOG -->
+                    <h2> Activity Log</h2>
+                    <div style="flex: 0 0 auto; max-height: 120px; overflow-y: auto;">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Prompt</th>
+                                    <th>Decision</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logTableBody">
+                                <tr>
+                                    <td colspan="4" style="text-align: center;">No activities yet</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="card" style="display: flex; flex-direction: column; margin-bottom: 0;">
+                    <h2> AI Chat Interface</h2>
+                    <div id="chatMessages" class="chat-messages" style="flex: 0 0 auto; max-height: 300px;">
+                        <div class="message ai">
+                            <div class="message-bubble">
+                                Hello! I'm your AI assistant. What can I help you with?
+                            </div>
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" placeholder="Type your message..."
+                            onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button id="sendBtn" onclick="sendMessage()">Send</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Modal for Review -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3> User Details for <span id="reviewUsername"></span></h3>
+            <div id="suspiciousPromptsList"></div>
+            <button class="approve-unblock" onclick="confirmUnblock()"> Approve & Unblock User</button>
+            <button onclick="closeModal()" style="margin-top: 10px; background: #c9bdbd;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+
+        const API_BASE = "http://127.0.0.1:5000";
+        let authToken = null;
+        let refreshToken = null;  // NEW: Store refresh token
+        let tokenExpiryTimer = null;  // NEW: Timer for auto-refresh
+        let currentTrustScore = 100;
+        let currentDecision = "ALLOW";
+        let activityLog = [];
+        let currentUserRole = "user";
+        let currentUsername = "";
+        let currentUserId = null;
+        let pendingUnblockUserId = null;
+
+        // ============================================
+        // DROPDOWN FUNCTIONS
+        // ============================================
+
+        function toggleDropdown() {
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('active');
+            const arrow = document.getElementById('dropdownArrow');
+            if (menu.classList.contains('active')) {
+                arrow.innerText = '▲';
+            } else {
+                arrow.innerText = '▼';
+            }
+        }
+
+        // Close dropdown if clicked outside
+        window.onclick = function (event) {
+            if (!event.target.closest('.profile-menu')) {
+                const menu = document.getElementById('profileMenu');
+                if (menu && menu.classList.contains('active')) {
+                    menu.classList.remove('active');
+                    document.getElementById('dropdownArrow').innerText = '▼';
+                }
+            }
+        }
+
+        // ============================================
+        // TOKEN REFRESH FUNCTIONS (NEW)
+        // ============================================
+
+        // Store both tokens after login
+        function storeTokens(accessToken, refreshTokenValue, expiresInSeconds) {
+            authToken = accessToken;
+            refreshToken = refreshTokenValue;
+            localStorage.setItem('access_token', accessToken);
+            localStorage.setItem('refresh_token', refreshTokenValue);
+
+            // Default to 5 minutes (300 seconds) if not provided
+            const expirySecs = expiresInSeconds || 300;
+            // Set timer to refresh token 30 seconds before expiry (minimum 10 seconds delay)
+            const refreshTimeMs = Math.max((expirySecs - 30) * 1000, 10000);
+
+            if (tokenExpiryTimer) clearTimeout(tokenExpiryTimer);
+            tokenExpiryTimer = setTimeout(() => {
+                refreshAccessToken();
+            }, refreshTimeMs);
+        }
+
+        // Clear tokens on logout
+        function clearTokens() {
+            authToken = null;
+            refreshToken = null;
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            if (tokenExpiryTimer) {
+                clearTimeout(tokenExpiryTimer);
+                tokenExpiryTimer = null;
+            }
+        }
+
+        // Refresh access token using refresh token
+        async function refreshAccessToken() {
+            const storedRefreshToken = refreshToken || localStorage.getItem('refresh_token');
+
+            if (!storedRefreshToken) {
+                console.log("No refresh token available, redirecting to login");
+                handleLogout();
+                return null;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh_token: storedRefreshToken })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token;
+                    localStorage.setItem('access_token', data.access_token);
+
+                    // Schedule next refresh based on new token's expiry
+                    storeTokens(data.access_token, storedRefreshToken, data.expires_in);
+
+                    showAlert("Session refreshed successfully!", "info");
+                    return data.access_token;
+                } else {
+                    // Refresh failed, redirect to login
+                    showAlert("Session expired. Please login again.", "warning");
+                    handleLogout();
+                    return null;
+                }
+            } catch (error) {
+                console.error("Refresh token error:", error);
+                handleLogout();
+                return null;
+            }
+        }
+
+        // API request wrapper with auto-refresh on 401
+        async function authenticatedFetch(url, options = {}) {
+            const makeRequest = async (token) => {
+                const headers = {
+                    ...options.headers,
+                    'Authorization': `Bearer ${token}`
+                };
+                return fetch(url, { ...options, headers });
+            };
+
+            // First attempt with current token
+            let response = await makeRequest(authToken);
+
+            // If token expired, try to refresh
+            if (response.status === 401) {
+                const errorData = await response.clone().json();
+                if (errorData.code === "TOKEN_EXPIRED") {
+                    const newToken = await refreshAccessToken();
+                    if (newToken) {
+                        // Retry with new token
+                        response = await makeRequest(newToken);
+                    }
+                }
+            }
+
+            return response;
+        }
+
+        // ============================================
+        // TAB SWITCHING
+        // ============================================
+
+        function switchTab(tab) {
+            const loginContainer = document.getElementById("loginFormContainer");
+            const registerContainer = document.getElementById("registerFormContainer");
+
+            // Handle Steps (Sidebar)
+            const step1 = document.getElementById("step1");
+            const step2 = document.getElementById("step2");
+            const step1Title = document.getElementById("step1Title");
+            const step1Desc = document.getElementById("step1Desc");
+            const step2Title = document.getElementById("step2Title");
+            const step2Desc = document.getElementById("step2Desc");
+
+            // Handle Dots
+            const dot1 = document.getElementById("dot1");
+            const dot2 = document.getElementById("dot2");
+
+            if (tab === "login") {
+                loginContainer.classList.remove("hidden");
+                registerContainer.classList.add("hidden");
+
+                step1Title.innerText = "Authentication";
+                step1Desc.innerText = "Enter your credentials";
+                step2Title.innerText = "Verification";
+                step2Desc.innerText = "MFA Security Check";
+
+                step1.classList.add("active");
+                step2.classList.remove("active");
+
+                dot1.classList.add("active");
+                dot2.classList.remove("active");
+
+                document.getElementById("loginError").style.display = "none";
+                document.getElementById("registerError").style.display = "none";
+                document.getElementById("registerSuccess").style.display = "none";
+            } else {
+                loginContainer.classList.add("hidden");
+                registerContainer.classList.remove("hidden");
+
+                step1Title.innerText = "Your Details";
+                step1Desc.innerText = "Please provide your name";
+                step2Title.innerText = "Create Password";
+                step2Desc.innerText = "Choose secure password";
+
+                step1.classList.add("active");
+                step2.classList.remove("active");
+
+                dot1.classList.remove("active");
+                dot2.classList.add("active");
+
+                document.getElementById("loginError").style.display = "none";
+                document.getElementById("registerError").style.display = "none";
+                document.getElementById("registerSuccess").style.display = "none";
+            }
+        }
+
+        // ============================================
+        // CHECK SERVER STATUS
+        // ============================================
+
+        async function checkServerStatus() {
+            const statusSpan = document.getElementById("serverStatus");
+            try {
+                const response = await fetch(`${API_BASE}/health`, { timeout: 3000 });
+                if (response.ok) {
+                    statusSpan.innerHTML = "Online ";
+                    statusSpan.className = "server-online";
+                    return true;
+                }
+            } catch (error) {
+                statusSpan.innerHTML = "Offline ";
+                statusSpan.className = "server-offline";
+                return false;
+            }
+        }
+
+        // ============================================
+        // REGISTER
+        // ============================================
+
+        async function handleRegister() {
+            const username = document.getElementById("regUsername").value;
+            const email = document.getElementById("regEmail").value;
+            const password = document.getElementById("regPassword").value;
+            const registerError = document.getElementById("registerError");
+            const registerSuccess = document.getElementById("registerSuccess");
+
+            registerError.style.display = "none";
+            registerSuccess.style.display = "none";
+
+            if (!username || !email || !password) {
+                registerError.innerText = "Please fill all fields";
+                registerError.style.display = "block";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.mfa_setup) {
+                        // Store credentials for the verification step
+                        compulsoryMFASecret = data.mfa_setup.secret;
+                        compulsoryUsername = username;
+                        compulsoryPassword = password;
+
+                        // Display QR code
+                        const qrContainer = document.getElementById("compulsoryQrContainer");
+                        qrContainer.innerHTML = `<img src="${data.mfa_setup.qr_code}" alt="MFA QR Code" style="max-width: 250px; border-radius: 10px; border: 2px solid #00d4ff;">`;
+
+                        // Hide the login/register section and show MFA setup screen
+                        document.getElementById("loginSection").classList.add("hidden");
+                        document.getElementById("mfaSetupScreen").classList.remove("hidden");
+
+                        // Clear the registration form inputs
+                        document.getElementById("regUsername").value = "";
+                        document.getElementById("regEmail").value = "";
+                        document.getElementById("regPassword").value = "";
+                    } else {
+                        // Fallback
+                        registerSuccess.innerText = " Account created successfully! You can now login.";
+                        registerSuccess.style.display = "block";
+                        document.getElementById("regUsername").value = "";
+                        document.getElementById("regEmail").value = "";
+                        document.getElementById("regPassword").value = "";
+
+                        setTimeout(() => {
+                            switchTab("login");
+                            document.getElementById("loginUsername").value = username;
+                        }, 2000);
+                    }
+                } else {
+                    registerError.innerText = data.error || "Registration failed";
+                    registerError.style.display = "block";
+                }
+            } catch (error) {
+                registerError.innerText = "Cannot connect to server. Make sure Flask is running on port 5000";
+                registerError.style.display = "block";
+            }
+        }
+
+
+
+        // ============================================
+        // LOGIN (UPDATED for refresh tokens)
+        // ============================================
+
+        async function handleLogin() {
+            const username = document.getElementById("loginUsername").value;
+            const password = document.getElementById("loginPassword").value;
+            const loginError = document.getElementById("loginError");
+            const mfaCode = document.getElementById("loginMfaCode").value;
+            loginError.style.display = "none";
+
+            if (!username || !password) {
+                loginError.innerText = "Please enter username and password";
+                loginError.style.display = "block";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, mfa_code: mfaCode })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store both access and refresh tokens
+                    storeTokens(data.access_token, data.refresh_token, data.expires_in);
+                    currentUsername = username;
+                    document.getElementById('displayUsername').innerText = username;
+
+                    // Get user info with the new authenticated fetch
+                    const userInfo = await getUserInfo(username);
+                    currentUserRole = userInfo.role;
+                    currentUserId = userInfo.user_id;
+
+                    // Get trust score from user info
+                    currentTrustScore = userInfo.trust_score;
+                    currentDecision = currentTrustScore >= 80 ? "ALLOW" : (currentTrustScore >= 40 ? "RESTRICT" : "BLOCK");
+
+                    document.getElementById("loginSection").classList.add("hidden");
+                    document.getElementById("appSection").classList.remove("hidden");
+
+                    updateTrustScoreDisplay(currentTrustScore, currentDecision);
+                    addChatMessage(`Welcome ${username}! `, false);
+                    showAlert(`Login successful! Token expires in ${data.expires_in} seconds.`, "success");
+
+                    if (currentUserRole === "admin") {
+                        document.getElementById("adminPanel").classList.remove("hidden");
+                        document.getElementById("trustScoreSection").classList.add("hidden");
+
+                        loadBlockedUsers();
+                        showAlert(" Welcome Admin! You can review blocked users.", "info");
+                    } else {
+                        document.getElementById("adminPanel").classList.add("hidden");
+                        document.getElementById("trustScoreSection").classList.remove("hidden");
+
+                        if (currentDecision === "BLOCK") {
+                            showAlert(` Your account is BLOCKED due to security violations.`, "danger");
+                        }
+                    }
+                    // Reset MFA field
+                    document.getElementById("loginMfaCode").value = "";
+                    document.getElementById("mfaField").classList.add("hidden");
+                    mfaRequired = false;
+
+                } else if (response.status === 401 && data.mfa_setup_needed) {
+                    // MFA setup required - compulsory!
+                    loginError.style.display = "none";
+                    await showCompulsoryMFASetup(username, password);
+                } else if (response.status === 401 && data.mfa_required) {
+                    // MFA code required (user has MFA enabled)
+                    mfaRequired = true;
+                    document.getElementById("mfaField").classList.remove("hidden");
+                    loginError.innerText = "MFA code required. Please enter your 6-digit code.";
+                    loginError.style.display = "block";
+                } else {
+                    loginError.innerText = data.error || "Login failed";
+                    loginError.style.display = "block";
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                loginError.innerText = "Cannot connect to server. Make sure Flask is running on port 5000";
+                loginError.style.display = "block";
+            }
+        }
+
+        async function getUserInfo(username) {
+            try {
+                // Use authenticatedFetch for automatic token refresh
+                const response = await authenticatedFetch(`${API_BASE}/user/${username}`, {
+                    method: 'GET'
+                });
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (error) {
+                console.error("Get user info error:", error);
+            }
+            return { role: "user", trust_score: 100, user_id: null };
+        }
+
+        // ============================================
+        // SEND MESSAGE (UPDATED with authenticatedFetch)
+        // ============================================
+
+        async function sendMessage() {
+            const input = document.getElementById("chatInput");
+            const prompt = input.value.trim();
+
+            if (!prompt) return;
+            if (!authToken) {
+                showAlert("Please login first", "danger");
+                return;
+            }
+            if (currentDecision === "BLOCK") {
+                showAlert("Your access is BLOCKED. Cannot send messages.", "danger");
+                return;
+            }
+
+            addChatMessage(prompt, true);
+            input.value = "";
+
+            const sendBtn = document.getElementById("sendBtn");
+            sendBtn.disabled = true;
+            sendBtn.textContent = "Sending...";
+
+            addChatMessage("Typing...", false);
+            const typingMsg = document.querySelector("#chatMessages .message:last-child");
+
+            try {
+                // Use authenticatedFetch for automatic token refresh
+                const response = await authenticatedFetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await response.json();
+
+                if (typingMsg) typingMsg.remove();
+
+                if (response.status === 403 || data.status === "blocked") {
+                    addChatMessage(` BLOCKED: ${data.reason || 'Access denied'} Trust score: ${data.trust_score}`, false);
+                    updateTrustScoreDisplay(data.trust_score, "BLOCK");
+                    showAlert("This prompt was BLOCKED due to security policy!", "danger");
+                } else if (data.status === "restricted") {
+                    addChatMessage(data.response, false);
+                    updateTrustScoreDisplay(data.trust_score, "RESTRICT");
+                    showAlert("Your trust score has been reduced. Further violations may lead to block.", "warning");
+                } else {
+                    addChatMessage(data.response, false);
+                    if (data.trust_score) {
+                        updateTrustScoreDisplay(data.trust_score, data.decision || "ALLOW");
+                    }
+                }
+
+                addToLog(prompt, data.decision || currentDecision, data.trust_score || currentTrustScore);
+
+            } catch (error) {
+                if (typingMsg) typingMsg.remove();
+                addChatMessage("Network error. Make sure the server is running.", false);
+                showAlert("Network error. Please try again.", "danger");
+            }
+
+            sendBtn.disabled = false;
+            sendBtn.textContent = "Send";
+        }
+
+        // ============================================
+        // ADMIN FUNCTIONS (UPDATED with authenticatedFetch)
+        // ============================================
+
+        async function loadBlockedUsers() {
+            if (currentUserRole !== "admin") return;
+
+            try {
+                console.log("Loading blocked users...");
+                const response = await authenticatedFetch(`${API_BASE}/admin/users`, {
+                    method: 'GET'
+                });
+
+                console.log("Response status:", response.status);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("Data received:", data);
+
+                    // Handle different response formats
+                    let users = [];
+                    if (data.users) {
+                        users = data.users;
+                    } else if (Array.isArray(data)) {
+                        users = data;
+                    } else {
+                        console.error("Unexpected data format:", data);
+                        users = [];
+                    }
+
+                    const blockedUsers = users.filter(user => user.is_blocked === 1);
+                    console.log("Blocked users found:", blockedUsers.length);
+                    displayBlockedUsers(blockedUsers);
+                } else {
+                    const errorText = await response.text();
+                    console.error("Failed to load users:", response.status, errorText);
+                    document.getElementById("blockedUsersTable").innerHTML =
+                        '<tr><td colspan="4" style="text-align: center;"> Error: ' + response.status + '</td></tr>';
+                }
+            } catch (error) {
+                console.error("Failed to load blocked users:", error);
+                document.getElementById("blockedUsersTable").innerHTML =
+                    '<tr><td colspan="4" style="text-align: center;"> Error: ' + error.message + '</td></tr>';
+            }
+        }
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                button.innerHTML = "🙈";  // Hide icon
+            } else {
+                input.type = "password";
+                button.innerHTML = "👁️";  // Show icon
+            }
+        }
+
+        function displayBlockedUsers(users) {
+            const tbody = document.getElementById("blockedUsersTable");
+
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;"> No blocked users found</td<tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(user => {
+                const score = user.current_trust_score || user.trust_score;
+                return `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${escapeHtml(user.username)}</td>
+                        <td><span style="color: #ff4444; font-weight: bold;">${score}</span></td>
+                        <td>
+                            <button class="review-btn" onclick="openReviewModal(${user.id}, '${user.username}')">
+                                 Review
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function openReviewModal(userId, username) {
+            pendingUnblockUserId = userId;
+            document.getElementById("reviewUsername").innerHTML = username;
+
+            const promptsList = document.getElementById("suspiciousPromptsList");
+            promptsList.innerHTML = '<p>Loading user details...</p>';
+
+            try {
+                const response = await authenticatedFetch(`${API_BASE}/admin/user-details/${userId}`, {
+                    method: 'GET'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Display user summary
+                    const summary = data.summary || { total_prompts: 0, safe_count: 0, suspicious_count: 0, malicious_count: 0 };
+                    const summaryHtml = `
+                <div style="background: #f7f8fa; border: 1px solid #eaeaea; padding: 10px; border-radius: 10px; margin-bottom: 15px; color: #1a1a2e;">
+                    <strong> User Statistics:</strong><br>
+                    Total Prompts: ${summary.total_prompts || 0}<br>
+                    Safe: ${summary.safe_count || 0}<br>
+                    Suspicious: ${summary.suspicious_count || 0}<br>
+                    Malicious: ${summary.malicious_count || 0}
+                </div>
+            `;
+
+                    // Display recent prompts
+                    const recentPrompts = data.all_recent_prompts || [];
+                    let promptsHtml = '<strong> Recent Prompts (Last 50):</strong><br>';
+
+                    if (recentPrompts.length > 0) {
+                        promptsHtml += recentPrompts.map((log, index) => `
+                    <div class="prompt-log-item">
+                        <div class="prompt-log-time">#${index + 1} - ${log.timestamp} | Risk: ${log.risk} | Action: ${log.action}</div>
+                        <div class="prompt-text">"${escapeHtml(log.prompt)}"</div>
+                    </div>
+                `).join('');
+                    } else {
+                        promptsHtml += '<p style="color: #8892b0;">No prompts recorded for this user.</p>';
+                    }
+
+                    // Also show if user is blocked
+                    const blockedInfo = data.blocked_info || {};
+                    const blockedHtml = `
+                <div style="background: #fff0f0; border: 1px solid #ffcccc; color: #cc0000; padding: 10px; border-radius: 10px; margin-top: 15px;">
+                    <strong> Block Status:</strong><br>
+                    Blocked: ${blockedInfo.is_blocked ? ' YES' : ' NO'}<br>
+                    ${blockedInfo.blocked_reason ? `Reason: ${blockedInfo.blocked_reason}` : ''}
+                </div>
+            `;
+
+                    promptsList.innerHTML = summaryHtml + promptsHtml + blockedHtml;
+                } else {
+                    promptsList.innerHTML = '<p style="color: #ff8888;"> Error loading user details</p>';
+                }
+            } catch (error) {
+                console.error("Error loading user details:", error);
+                promptsList.innerHTML = '<p style="color: #ff8888;"> Error loading user details</p>';
+            }
+
+            document.getElementById("reviewModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("reviewModal").style.display = "none";
+            pendingUnblockUserId = null;
+        }
+
+        async function confirmUnblock() {
+            console.log("=== UNBLOCK DEBUG ===");
+            console.log("pendingUnblockUserId:", pendingUnblockUserId);
+            console.log("authToken exists:", !!authToken);
+            console.log("currentUserRole:", currentUserRole);
+
+            if (!pendingUnblockUserId) {
+                console.error("No user ID to unblock");
+                showAlert("Error: No user selected", "danger");
+                return;
+            }
+
+            try {
+                const url = `${API_BASE}/admin/unblock-user/${pendingUnblockUserId}`;
+                console.log("Calling URL:", url);
+
+                const response = await authenticatedFetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                console.log("Response status:", response.status);
+
+                let data = {};
+                try {
+                    data = await response.json();
+                    console.log("Response data:", data);
+                } catch (e) {
+                    console.log("Could not parse response as JSON");
+                }
+
+                if (response.ok) {
+                    showAlert(" User has been unblocked successfully!", "info");
+                    await loadBlockedUsers();
+
+                    if (currentUserId === pendingUnblockUserId) {
+                        currentTrustScore = 100;
+                        currentDecision = "ALLOW";
+                        updateTrustScoreDisplay(100, "ALLOW");
+                        showAlert(" Your account has been unblocked! Trust score restored to 100.", "info");
+                    }
+                } else {
+                    const errorMsg = data.error || data.message || `Status: ${response.status}`;
+                    console.error("Unblock failed:", errorMsg);
+                    showAlert(` Failed to unblock user: ${errorMsg}`, "danger");
+                }
+            } catch (error) {
+                console.error("Unblock error:", error);
+                showAlert(`Error unblocking user: ${error.message}`, "danger");
+            }
+            closeModal();
+        }
+
+        // ============================================
+        // UI FUNCTIONS
+        // ============================================
+
+        function updateTrustScoreDisplay(score, decision) {
+            currentTrustScore = score;
+            currentDecision = decision;
+
+            document.getElementById("trustScoreValue").innerText = score;
+
+            const circumference = 314;
+            const offset = circumference - (score / 100) * circumference;
+            const circle = document.getElementById("scoreCircle");
+            if (circle) circle.style.strokeDashoffset = offset;
+
+            const badge = document.getElementById("decisionBadge");
+            badge.className = `decision-badge decision-${decision.toLowerCase()}`;
+            badge.innerText = decision;
+
+            const chatInput = document.getElementById("chatInput");
+            const sendBtn = document.getElementById("sendBtn");
+            if (decision === "BLOCK") {
+                chatInput.disabled = true;
+                sendBtn.disabled = true;
+            } else {
+                chatInput.disabled = false;
+                sendBtn.disabled = false;
+            }
+        }
+
+        function showAlert(message, type) {
+            const banner = document.getElementById("alertBanner");
+            if (!banner) return;
+
+            banner.className = `alert-banner alert-${type}`;
+            banner.innerText = message;
+            banner.style.display = "block";
+            banner.classList.remove("hide");
+
+            // Auto-hide after 5 seconds with animation
+            if (banner.timeoutId) clearTimeout(banner.timeoutId);
+
+            banner.timeoutId = setTimeout(() => {
+                banner.classList.add("hide");
+                setTimeout(() => {
+                    banner.style.display = "none";
+                    banner.classList.remove("hide");
+                }, 500);
+            }, 4500);
+        }
+
+        function addToLog(prompt, decision, score) {
+            const time = new Date().toLocaleTimeString();
+            activityLog.unshift({ time, prompt: prompt.substring(0, 40), decision, score });
+            if (activityLog.length > 20) activityLog.pop();
+
+            const tbody = document.getElementById("logTableBody");
+            if (activityLog.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No activities yet</td</tr>';
+                return;
+            }
+
+            tbody.innerHTML = activityLog.map(log => `
+                <tr>
+                    <td>${log.time}</td>
+                    <td>${escapeHtml(log.prompt)}${log.prompt.length >= 40 ? '...' : ''}</td>
+                    <td><span class="status-badge status-${log.decision.toLowerCase()}">${log.decision}</span></td>
+                    <td>${log.score}</td>
+                </tr>
+            `).join('');
+        }
+
+        function addChatMessage(message, isUser) {
+            const chatContainer = document.getElementById("chatMessages");
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+            const time = new Date().toLocaleTimeString();
+            messageDiv.innerHTML = `
+                <div class="message-bubble">${escapeHtml(message)}</div>
+                <div class="message-time">${time}</div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function handleLogout() {
+            clearTokens();  // Clear both tokens
+            currentUserRole = "user";
+            currentUsername = "";
+            currentUserId = null;
+            currentTrustScore = 100;
+            currentDecision = "ALLOW";
+            activityLog = [];
+            mfaRequired = false;
+            mfaSetupSecret = null;
+
+            // Reset compulsory MFA variables
+            compulsoryMFASecret = null;
+            compulsoryUsername = null;
+            compulsoryPassword = null;
+
+            document.getElementById("appSection").classList.add("hidden");
+            document.getElementById("loginSection").classList.remove("hidden");
+            document.getElementById("loginError").style.display = "none";
+            document.getElementById("adminPanel").classList.add("hidden");
+            document.getElementById("mfaField").classList.add("hidden");
+            document.getElementById("loginMfaCode").value = "";
+
+            // Reset MFA panels
+            const mfaSetupScreen = document.getElementById("mfaSetupScreen");
+
+            if (mfaSetupScreen) mfaSetupScreen.classList.add("hidden");
+
+            document.getElementById("compulsoryQrContainer").innerHTML = "";
+            document.getElementById("compulsoryMfaCode").value = "";
+
+            document.getElementById("chatMessages").innerHTML = `
+        <div class="message ai">
+            <div class="message-bubble">
+                Hello! I'm your AI assistant. What can I help you with?
+            </div>
+            <div class="message-time">Just now</div>
+        </div>
+    `;
+
+            document.getElementById("logTableBody").innerHTML = '<tr><td colspan="4" style="text-align: center;">No activities yet</td</tr>';
+            document.getElementById("loginUsername").value = "";
+            document.getElementById("loginPassword").value = "";
+            document.getElementById("trustScoreValue").innerText = "100";
+            document.getElementById("decisionBadge").className = "decision-badge decision-allow";
+            document.getElementById("decisionBadge").innerText = "ALLOW";
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+
+        // Check for existing tokens on page load
+        function checkExistingSession() {
+            const storedAccess = localStorage.getItem('access_token');
+            const storedRefresh = localStorage.getItem('refresh_token');
+
+            if (storedAccess && storedRefresh) {
+                authToken = storedAccess;
+                refreshToken = storedRefresh;
+                // Try to restore session
+                refreshAccessToken().then(newToken => {
+                    if (newToken) {
+                        showAlert("Session restored!", "info");
+                    }
+                });
+            }
+        }
+
+        checkServerStatus();
+        setInterval(checkServerStatus, 10000);
+        checkExistingSession();  // Check for existing session
+
+        // Enter key handlers
+        document.getElementById("loginUsername")?.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") handleLogin();
+        });
+        document.getElementById("loginPassword")?.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") handleLogin();
+        });
+        document.getElementById("regUsername")?.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") handleRegister();
+        });
+        document.getElementById("regEmail")?.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") handleRegister();
+        });
+        document.getElementById("regPassword")?.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") handleRegister();
+        });
+        // ============================================
+        // MFA FUNCTIONS
+        // ============================================
+
+        let mfaRequired = false;
+        let mfaSetupSecret = null;
+
+        // ============================================
+        // COMPULSORY MFA FUNCTIONS
+        // ============================================
+
+        let compulsoryMFASecret = null;
+        let compulsoryUsername = null;
+        let compulsoryPassword = null;
+
+        async function showCompulsoryMFASetup(username, password) {
+            try {
+                const response = await fetch(`${API_BASE}/mfa/setup-compulsory`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    compulsoryMFASecret = data.secret;
+                    compulsoryUsername = username;
+                    compulsoryPassword = password;
+
+                    // Display QR code
+                    const qrContainer = document.getElementById("compulsoryQrContainer");
+                    qrContainer.innerHTML = `<img src="${data.qr_code}" alt="MFA QR Code" style="max-width: 250px; border-radius: 10px; border: 2px solid #00d4ff;">`;
+
+                    // Hide login section, show MFA setup screen
+                    document.getElementById("loginSection").classList.add("hidden");
+                    document.getElementById("mfaSetupScreen").classList.remove("hidden");
+                } else {
+                    const error = await response.json();
+                    showAlert(error.error || "Failed to setup MFA", "danger");
+                    document.getElementById("loginError").innerText = error.error || "Failed to setup MFA";
+                    document.getElementById("loginError").style.display = "block";
+                }
+            } catch (error) {
+                console.error("Error setting up compulsory MFA:", error);
+                document.getElementById("loginError").innerText = "Error setting up MFA";
+                document.getElementById("loginError").style.display = "block";
+            }
+        }
+
+        async function verifyCompulsoryMFA() {
+            const code = document.getElementById("compulsoryMfaCode").value;
+            const errorDiv = document.getElementById("mfaSetupError");
+
+            if (!code) {
+                errorDiv.innerText = "Please enter the verification code";
+                errorDiv.style.display = "block";
+                return;
+            }
+
+            errorDiv.style.display = "none";
+
+            try {
+                const response = await fetch(`${API_BASE}/mfa/verify-compulsory`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: compulsoryUsername,
+                        password: compulsoryPassword,
+                        secret: compulsoryMFASecret,
+                        code: code
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // MFA setup successful, redirect to login tab
+                    document.getElementById("mfaSetupScreen").classList.add("hidden");
+
+                    // Show login layout directly (instead of tabs since they are removed)
+                    document.getElementById("loginSection").classList.remove("hidden");
+                    switchTab("login");
+                    document.getElementById("loginUsername").value = compulsoryUsername;
+
+                    showAlert(" MFA enabled successfully! Please login.", "success");
+
+                    // Reset compulsory variables
+                    compulsoryMFASecret = null;
+                    compulsoryUsername = null;
+                    compulsoryPassword = null;
+                    document.getElementById("compulsoryMfaCode").value = "";
+                } else {
+                    errorDiv.innerText = data.error || "Invalid verification code. Please try again.";
+                    errorDiv.style.display = "block";
+                }
+            } catch (error) {
+                errorDiv.innerText = "Error verifying MFA code";
+                errorDiv.style.display = "block";
+            }
+        }
+    </script>
+</body>
+
+</html>
